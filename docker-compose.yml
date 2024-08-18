@@ -1,0 +1,49 @@
+services:
+  web:
+    image: nginx:latest
+    ports:
+      - 8080:80
+      # - 443:443 # for ssl
+    volumes:
+      - ./:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      # - /root/ssl/:/etc/nginx/data/ssl/ # for ssl
+    depends_on:
+      - php
+    restart: always
+
+  php:
+    image: ghaseminia/laravel:1.0.0
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - mysql
+    links:
+      - mysql
+    restart: always
+
+  mysql:
+    image: mariadb:10.4.8-bionic
+    volumes:
+      - ./db-data:/var/lib/mysql
+    environment:
+      PMA_HOST: mysql
+      MYSQL_DATABASE: laravel
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_USER: root
+      MYSQL_PASSWORD: password
+    ports:
+      - 3306:3306
+    restart: always
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    ports:
+      - 86:80
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: password
+    depends_on:
+      - mysql
+    restart: always
+      
